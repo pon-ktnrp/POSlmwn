@@ -1,0 +1,1 @@
+export const fmtCurrency = (val: number) => `฿${(val / 100).toFixed(2)}`;
