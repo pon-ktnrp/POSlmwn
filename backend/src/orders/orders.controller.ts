@@ -1,12 +1,20 @@
 import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Orders')
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
+
+  @Post('calculate')
+  @ApiOperation({ summary: 'Calculate totals (Preview before Create)' })
+  @ApiResponse({ status: 200, description: 'Returns calculated subtotal, tax, discount, and total' })
+  calculate(@Body() createOrderDto: CreateOrderDto) {
+    // This calls the shared logic but does NOT save to the database
+    return this.ordersService.calculateSummary(createOrderDto);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new order (Transaction)' })
@@ -27,7 +35,7 @@ export class OrdersController {
   }
 
   @Patch(':id/advance')
-  @ApiOperation({ summary: 'Auto-advance order to next status (e.g. OPEN -> CONFIRMED)' })
+  @ApiOperation({ summary: 'Auto-advance order to next status' })
   advanceStatus(@Param('id') id: string) {
     return this.ordersService.advanceStatus(id);
   }
