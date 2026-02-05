@@ -15,17 +15,14 @@ export class AppliedDiscount {
   @JoinColumn({ name: 'orderId' })
   order: Order;
 
-  // CHANGE: New Nullable FK. 
-  // If the original discount is deleted, this becomes NULL (SET NULL), 
-  // but the record stays for the audit.
   @Column({ type: 'uuid', nullable: true })
-  discountId: string;
+  discountId?: string | null;
 
   @ManyToOne(() => Discount, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'discountId' })
-  discount: Discount;
+  discount?: Discount | null;
 
-  @Column({ type: 'varchar', length: 200 }) // CHANGE: Safe length
+  @Column({ type: 'varchar', length: 200 }) 
   codeSnapshot: string; 
 
   @Column({ type: 'int' })

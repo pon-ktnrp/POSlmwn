@@ -29,7 +29,7 @@ export class CreateOrderDto {
   items: OrderItemDto[];
 
   // SENIOR UPGRADE: Send the code, not the value.
-  @ApiProperty({ example: 'SUMMER2026', required: false })
+  @ApiProperty({ example: 'SUMMER10', required: false })
   @IsOptional()
   @IsString()
   discountCode?: string;

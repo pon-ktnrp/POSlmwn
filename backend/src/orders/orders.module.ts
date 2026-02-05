@@ -5,11 +5,14 @@ import { OrdersController } from './orders.controller';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { AppliedDiscount } from './entities/applied-discount.entity';
-import { Discount } from '../discounts/entities/discount.entity'; 
-import { Product } from '../products/entities/product.entity'; 
+import { Product } from '../products/entities/product.entity';
+import { DiscountsModule } from '../discounts/discounts.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderItem, AppliedDiscount, Discount, Product])], 
+  imports: [
+    TypeOrmModule.forFeature([Order, OrderItem, AppliedDiscount, Product]),
+    DiscountsModule,
+  ],
   controllers: [OrdersController],
   providers: [OrdersService],
 })

@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Discount } from './entities/discount.entity';
-import { DiscountType } from '../orders/orders.enums';
+import { DiscountType } from './discounts.enums';
+import { CreateDiscountDto } from './dto/create-discount.dto';
+import { UpdateDiscountDto } from './dto/update-discount.dto';
 
 @Injectable()
 export class DiscountsService {
@@ -11,18 +13,64 @@ export class DiscountsService {
     private discountsRepository: Repository<Discount>,
   ) {}
 
-  // 1. Seed Logic (Create 2 Rules)
+  // 1. Create (Admin Manual Entry)
+  async create(createDiscountDto: CreateDiscountDto) {
+
+    const code = createDiscountDto.code.trim().toUpperCase(); // ← Normalize
+    createDiscountDto.code = code;
+    // Check for duplicates
+    const existing = await this.discountsRepository.findOne({ 
+      where: { code: createDiscountDto.code } 
+    });
+    if (existing) {
+      throw new ConflictException(`Discount code ${createDiscountDto.code} already exists`);
+    }
+
+    const discount = this.discountsRepository.create(createDiscountDto);
+    return this.discountsRepository.save(discount);
+  }
+
+  // 2. Find All (For Admin Dashboard)
+  async findAll() {
+    return this.discountsRepository.find({
+      order: { isActive: 'DESC', createdAt: 'DESC' }, // Active ones first
+    });
+  }
+
+  // 3. Find One (For Edit Form)
+  async findOne(id: string) {
+    const discount = await this.discountsRepository.findOne({ where: { id } });
+    if (!discount) {
+      throw new NotFoundException(`Discount with ID ${id} not found`);
+    }
+    return discount;
+  }
+
+  // 4. Update (e.g., Disable a code, change value)
+  async update(id: string, updateDiscountDto: UpdateDiscountDto) {
+    const discount = await this.findOne(id);
+    const updated = this.discountsRepository.merge(discount, updateDiscountDto);
+    return this.discountsRepository.save(updated);
+  }
+
+  // 5. Soft Delete (Disable it)
+  async remove(id: string) {
+    const discount = await this.findOne(id);
+    discount.isActive = false;
+    return this.discountsRepository.save(discount);
+  }
+
   async seed() {
     const count = await this.discountsRepository.count();
     if (count > 0) return { message: 'Discounts already exist. Skipping.' };
 
     const rules = [
       {
-        code: 'IwantInternship',
+        code: 'INTERNPLS',
         type: DiscountType.PERCENTAGE,
         value: 98, // 98%
         isActive: true,
-      }
+      },
       {
         code: 'SUMMER10',
         type: DiscountType.PERCENTAGE,
@@ -44,7 +92,7 @@ export class DiscountsService {
     ];
 
     await this.discountsRepository.save(rules);
-    return { message: 'Seeding complete! Added 3 discount codes.' };
+    return { message: `Seeding complete! Added ${rules.length} discount codes.` };
   }
 
   // 2. The Strategy Logic (The Brain)

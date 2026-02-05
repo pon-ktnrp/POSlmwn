@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
-import { DiscountType } from '../../orders/orders.enums';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index, UpdateDateColumn } from 'typeorm';
+import { DiscountType } from '../discounts.enums';
 
 @Entity('discounts')
 export class Discount {
@@ -16,12 +16,18 @@ export class Discount {
   })
   type: DiscountType;
 
-  @Column({ type: 'int' })
-  value: number; // 10 (percent) or 5000 (satang)
+  @Column({ 
+    type: 'int', 
+    comment: 'For PERCENTAGE: 10 means 10%. For FIXED_AMOUNT: 5000 means 50 baht in satang' 
+  })
+  value: number;
 
-  @Column({ default: true })
+  @Column({ default: true, comment: 'Set to false to disable the code' })
   isActive: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

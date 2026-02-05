@@ -7,7 +7,4 @@ export enum OrderStatus {
   CANCELLED = 'CANCELLED',
 }
 
-export enum DiscountType {
-  PERCENTAGE = 'PERCENTAGE',
-  FIXED_AMOUNT = 'FIXED_AMOUNT',
-}
+export { DiscountType } from '../discounts/discounts.enums';
