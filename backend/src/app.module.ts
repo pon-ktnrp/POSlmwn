@@ -16,23 +16,25 @@ import { DiscountsModule } from './discounts/discounts.module';
     }),
 
     // 2. Configure TypeORM asynchronously (wait for Config to load first)
-    TypeOrmModule.forRootAsync({
+TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USER'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_NAME'),
+        // 1. USE THE URL: NestJS parses the long string automatically
+        url: configService.get<string>('DATABASE_URL'), 
         
-        // AUTO LOAD: Finds all files ending in .entity.ts
-        autoLoadEntities: true, 
+        // 2. REQUIRED FOR CLOUD: Cloud DBs reject non-SSL connections
+        ssl: {
+          rejectUnauthorized: false, 
+        },
 
-        // SYNCHRONIZE: Automatically creates tables based on Entities.
-        // WARNING: Set to 'false' in production to avoid accidental data loss.
-        synchronize: true, 
+        autoLoadEntities: true,
+        synchronize: true, // This will auto-create your 5 tables in the cloud!
+        // ADD THIS if you use "Transaction Pooler" (Port 6543)
+      extra: {
+        max: 10, // connection pool size
+      }
       }),
     }),
 

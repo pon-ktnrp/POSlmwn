@@ -9,7 +9,7 @@ export class Product {
   @Column({ length: 200 })
   name: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', comment: 'Price in satang (100 satang = 1 baht)' })
   priceInt: number;
 
   @Index()
