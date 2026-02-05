@@ -20,7 +20,7 @@ const mockOrder = {
   status: OrderStatus.OPEN,
   subtotalInt: 10000,
   items: [],
-} as Order;
+} as unknown as Order;
 
 describe('OrdersService', () => {
   let service: OrdersService;

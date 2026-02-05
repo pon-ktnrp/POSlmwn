@@ -33,10 +33,13 @@ export class OrdersService {
         where: { id: In(productIds), isActive: true } 
       });
 
-      if (products.length !== new Set(productIds).size) {
-        this.logger.error(`Order failed: Products missing or inactive. Requested: ${productIds.join(', ')}`);
-        throw new NotFoundException('One or more products not found');
+      if (products.length !== productIds.length) {
+        this.logger.error(
+          `Order failed: Missing/inactive products. requested=${productIds.join(', ')} foundActive=${products.map(p => p.id).join(', ')}`
+        );
+        throw new BadRequestException('One or more products are missing or inactive');
       }
+
 
       const productsMap = new Map(products.map((p) => [p.id, p]));
 
