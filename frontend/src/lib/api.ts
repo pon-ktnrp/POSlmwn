@@ -83,6 +83,8 @@ export const cancelOrder = async (id: string) => {
   return data;
 };
 
+// --- REPORTS API ---
+
 export interface ReportSummary {
   orderCount: number;
   grossSalesInt: number;

@@ -28,7 +28,6 @@ export default function CartSidebar() {
   const fmt = (val: number) => `฿${(val / 100).toFixed(2)}`;
 
   // --- 1. SYNC WITH BACKEND ---
-  // Whenever items or appliedCode changes, ask backend for new totals
   const fetchTotals = useCallback(async () => {
     if (items.length === 0) {
       setTotals(null);
@@ -36,7 +35,8 @@ export default function CartSidebar() {
     }
 
     setLoading(true);
-    setErrorMsg('');
+    // REMOVED: setErrorMsg('') -- We don't auto-clear errors here anymore. 
+    // This prevents the error from disappearing when the cart refreshes after a failed code.
     
     try {
       const dto: CreateOrderDto = {
@@ -50,7 +50,7 @@ export default function CartSidebar() {
       // If code is invalid, backend throws 404 or 400
       if (appliedCode) {
         setErrorMsg('Invalid Code'); 
-        setAppliedCode(''); // Reset invalid code
+        setAppliedCode(''); // Reset invalid code so the cart recalculates normally
       } else {
         console.error(err);
       }
@@ -68,7 +68,13 @@ export default function CartSidebar() {
   // --- 2. HANDLERS ---
   const handleApplyPromo = () => {
     if (!promoCodeInput.trim()) return;
-    setAppliedCode(promoCodeInput); // This triggers the useEffect above
+    setErrorMsg(''); // Clear error when user explicitly tries again
+    setAppliedCode(promoCodeInput); 
+  };
+
+  const handlePromoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPromoCodeInput(e.target.value);
+    if (errorMsg) setErrorMsg(''); // Clear error as soon as user types
   };
 
   const handlePlaceOrder = async () => {
@@ -87,6 +93,7 @@ export default function CartSidebar() {
       setAppliedCode('');
       setPromoCodeInput('');
       setTotals(null);
+      setErrorMsg('');
     } catch (err) {
       setErrorMsg('Failed to place order');
     } finally {
@@ -148,7 +155,8 @@ export default function CartSidebar() {
           placeholder="Promo Code"
           value={promoCodeInput}
           disabled={items.length === 0}
-          onChange={(e) => setPromoCodeInput(e.target.value)}
+          onChange={handlePromoChange}
+          error={!!errorMsg} // Turns the input red
           InputProps={{
             startAdornment: (
               <InputAdornment position="start"><LocalOfferIcon color="action" fontSize="small"/></InputAdornment>
