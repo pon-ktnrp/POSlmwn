@@ -112,6 +112,7 @@ Below are the key architectural decisions and the reasoning behind them.
 * **Database: PostgreSQL (Supabase)**
     * **Decision:** Use an ACID-compliant relational database.
     * **Reason:** Financial integrity demands atomic transactions. Complex writes (Order + Items + Discounts) must succeed or fail as a single atomic unit to prevent data corruption.
+    * **Supabase Reason** At first, I would like to use Docker with redis cahce, but under time constraint, Supabase is better
 
 * **Backend: NestJS + TypeORM**
     * **Decision:** Structured, modular framework with an ORM.
